@@ -3,7 +3,7 @@ const {Op} = require('sequelize')
 const AppError = require('../exception/AppError')
 const jwt = require('jsonwebtoken')
 
-const generateUserResponseAndRefreshTokens =async (res, user, status) => {
+const generateUserResponseAndRefreshTokens = async (user) => {
     const accessToken = jwt.sign(
         {
             id: user.id,
@@ -30,55 +30,77 @@ const generateUserResponseAndRefreshTokens =async (res, user, status) => {
     delete user.dataValues.updatedAt
     delete user.dataValues.refreshToken
 
-    return res.status(status).json({
+    return {
         user,
         accessToken,
         refreshToken
-    })
+    }
+}
+
+const setAuthCookies = async (res, accessToken, refreshToken) => {
+    const cookieOptions = {
+        httpOnly: true,
+        secure: false
+    };
+    const accessOptions = {
+        ...cookieOptions,
+        expires: new Date(
+            Date.now() + process.env.JWT_ACCESS_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000 // env should be in days
+        )
+    }
+
+    const refreshOptions = {
+        ...cookieOptions,
+        expires: new Date(
+            Date.now() + process.env.JWT_REFRESH_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000 // env should be in days
+        )
+    }
+
+    res.cookie('jwtAccess', accessToken, accessOptions)
+    res.cookie('jwtRefresh', refreshToken, refreshOptions)
 }
 
 const register = async (req, res, next) => {
-    const {username, email, password, passwordConfirm} = req.body
-    if (!username || !password || !passwordConfirm) {
+    const {fullName, email, password, passwordConfirm} = req.body
+    if (!email || !password || !passwordConfirm) {
         return next(AppError.BadRequest('Please fill all fields!'))
     }
     const candidate = await User.findAll({
         where: {
             [Op.or]: [
-                {username},
-                email && {email}
+                {email},
             ]
         }
     })
     if (candidate.length > 0) {
-        return next(AppError.BadRequest('User with this email or username is already exist.'))
+        return next(AppError.BadRequest('User with this email is already exist.'))
     }
 
     if (password !== passwordConfirm) {
         return next(AppError.BadRequest('Password mismatch.'))
     }
 
-    const user = await User.create({username, email, password})
-    generateUserResponseAndRefreshTokens(res, user, 200)
+    const user = await User.create({fullName, email, password})
+    const authResponse = await generateUserResponseAndRefreshTokens(user)
+    await setAuthCookies(res, authResponse.accessToken, authResponse.refreshToken)
+    return res.status(200).json(authResponse)
 }
 
 const login = async (req, res, next) => {
-    const {username, password} = req.body
-    if (!username || !password) return next(AppError.BadRequest('Please fill all fields!'))
+    const {email, password} = req.body
+    if (!email || !password) return next(AppError.BadRequest('Please fill all fields!'))
     const candidate = await User.findOne({
         where: {
-            username
+            email
         }
     })
     if (!candidate) return next(AppError.BadRequest('User does not exist!'))
     if (!await candidate.comparePassword(password)) return next(AppError.BadRequest('Wrong password!'))
-    await generateUserResponseAndRefreshTokens(res, candidate, 200)
+    return res.status(200).json(await generateUserResponseAndRefreshTokens(candidate))
 }
 
 const currentUser = async (req, res, next) => {
-    return res.status(200).json({
-        user: req.user
-    })
+    return res.status(200).json(await generateUserResponseAndRefreshTokens(req.user))
 }
 
 const refreshToken = async (req, res, next) => {
@@ -86,7 +108,7 @@ const refreshToken = async (req, res, next) => {
     if (!await user.compareTokens(req.headers.authorization.split(' ')[1])) {
         return next(AppError.Unauthorized())
     }
-    await generateUserResponseAndRefreshTokens(res, user, 200)
+    return res.status(200).json(await generateUserResponseAndRefreshTokens(user))
 }
 
 
@@ -94,5 +116,7 @@ module.exports = {
     register,
     login,
     currentUser,
-    refreshToken
+    refreshToken,
+    generateUserResponseAndRefreshTokens,
+    setAuthCookies
 }
