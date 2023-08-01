@@ -219,12 +219,29 @@ CLIENT_URL=http://localhost:3000/api/auth/set-cookie
 `body`
 
 ```
-{
-    "name": string,
-    "originCountry": string,
+}
+    "id": number,
+    "originalTitle": string,
+    "title": string,
+    "tagline": string,
+    "overview": string,
+    "posterPath": string,
+    "releaseDate": date,
+    "runtime": number,
+    "status": string,
+    "revenue": number,
+    "budget": number,
+    "votesAverage": float,
+    "votesCount": number,
+    "imdbId": string | null,
+    "originalLanguage": string,
+    "spokenLanguage": string,
+    "country": string,
+    "genreIds": [number],
+    "companyIds": [numbers]
 }
 ```
-<sub>Return company response</sub></br>
+<sub>Return movie response</sub></br>
 
 </br>`UPDATE MOVIE` PUT [/api/movies/{movieId}](#/api/movies/{movieId}) </br>
 <sub>Return movie response</sub></br>
