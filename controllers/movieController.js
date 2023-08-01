@@ -3,6 +3,38 @@ const Movie = require('../models/movieModel')
 const AppError = require('../exception/AppError')
 const Genre = require('../models/genreModel')
 const ProductionCompany = require('../models/productionCompanyModel')
+const {Op} = require('sequelize')
+
+// convert query object to where filter
+function convertObjectToFilter(object) {
+    const operatorMap = {
+        eq: Op.eq,
+        ne: Op.ne,
+        gt: Op.gt,
+        gte: Op.gte,
+        lt: Op.lt,
+        lte: Op.lte,
+        like: Op.like,
+        notLike: Op.notLike,
+    };
+
+    const filter = {};
+    for (const field in object) {
+        const operators = object[field];
+        for (const operator in operators) {
+            if (operatorMap[operator]) {
+                filter[field] = {
+                    ...filter[field],
+                    [operatorMap[operator]]: operators[operator],
+                };
+            } else {
+                filter[field] = object[field]
+            }
+        }
+    }
+
+    return filter;
+}
 
 const createOne = catchAsync(async (req, res, next) => {
     const {genreIds, companyIds, ...data} = req.body
@@ -79,7 +111,18 @@ const getOne = catchAsync(async (req, res, next) => {
 })
 
 const getAll = catchAsync(async (req, res, next) => {
-    const movies = await Movie.findAll({
+    const page = req.query.page || 1
+    const limit = req.query.limit || 10
+    const offset = (page - 1) * limit
+
+    const excludedFields = ['page', 'sort', 'limit', 'fields']
+    excludedFields.forEach(field => delete req.query[field])
+
+    const filterObject = convertObjectToFilter(req.query)
+    console.log(filterObject)
+
+    const movies = await Movie.findAndCountAll({
+        where: filterObject,
         include: [
             {
                 model: Genre,
@@ -98,7 +141,9 @@ const getAll = catchAsync(async (req, res, next) => {
                 }
             }
         ],
-        attributes: {exclude: ['createdAt', 'updatedAt']}
+        attributes: {exclude: ['createdAt', 'updatedAt']},
+        offset,
+        limit
     })
     return res.status(201).json({
         status: 'success',
