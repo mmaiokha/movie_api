@@ -43,7 +43,7 @@ const getOne = catchAsync(async (req, res, next) => {
 })
 
 const getAll = catchAsync(async (req, res, next) => {
-    const genres = await Genre.findAll()
+    const genres = await Genre.findAndCountAll()
     return res.status(200).json({
         status: 'success',
         result: genres

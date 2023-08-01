@@ -19,7 +19,6 @@ require('./models/assotiations')
 
 //passport
 require('./strategies/google-oauth2.strategy')
-require('./strategies/jwt.strategy')
 
 
 const app = express()

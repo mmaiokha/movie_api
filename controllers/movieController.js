@@ -119,7 +119,6 @@ const getAll = catchAsync(async (req, res, next) => {
     excludedFields.forEach(field => delete req.query[field])
 
     const filterObject = convertObjectToFilter(req.query)
-    console.log(filterObject)
 
     const movies = await Movie.findAndCountAll({
         where: filterObject,

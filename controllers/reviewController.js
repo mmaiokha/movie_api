@@ -52,7 +52,7 @@ const getOne = catchAsync(async (req, res, next) => {
 const getAll = catchAsync(async (req, res, next) => {
     const {movieId} = req.params
     // get reviews related to film if movieId else it will get all comments
-    const reviews = await Review.findAll(movieId && {where: {movieId}})
+    const reviews = await Review.findAndCountAll(movieId && {where: {movieId}})
 
     return res.status(201).json({
         status: 'success',

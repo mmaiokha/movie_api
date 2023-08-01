@@ -43,7 +43,7 @@ const getOne = catchAsync(async (req, res, next) => {
 })
 
 const getAll = catchAsync(async (req, res, next) => {
-    const productionCompanies = await ProductionCompany.findAll()
+    const productionCompanies = await ProductionCompany.findAndCountAll()
     return res.status(201).json({
         status: 'success',
         result: productionCompanies
