@@ -16,6 +16,10 @@ class AppError extends Error {
     static BadRequest(message, errors=[]) {
         return new AppError(message, 400, errors)
     }
+
+    static NotFound() {
+        return new AppError('Document not found', 404)
+    }
 }
 
 module.exports = AppError

@@ -7,56 +7,69 @@ const Movie = sequelize.define('movies', {
         primaryKey: true,
         autoIncrement: true
     },
-    original_title: {
-        type: DataTypes.STRING
+    originalTitle: {
+        type: DataTypes.STRING,
+        allowNull: false
     },
     title: {
-        type: DataTypes.STRING
+        type: DataTypes.STRING,
+        allowNull: false
     },
     tagline: {
-        type: DataTypes.STRING
+        type: DataTypes.STRING,
+        allowNull: false
     },
     overview: {
-        type: DataTypes.STRING
-    },
-    poster_path: {
         type: DataTypes.STRING,
-        default: 'movie_default.jpg'
+        allowNull: false
     },
-    release_date: {
-        type: DataTypes.DATE
+    posterPath: {
+        type: DataTypes.STRING,
+        defaultValue: 'movie_default.jpg',
+        allowNull: false
+    },
+    releaseDate: {
+        type: DataTypes.DATEONLY,
+        allowNull: false
     },
     runtime: {
-        type: DataTypes.INTEGER
+        type: DataTypes.INTEGER,
+        allowNull: false
     },
     status: {
-        type: DataTypes.ENUM('Released', 'Upcoming')
+        type: DataTypes.ENUM('Released', 'Upcoming'),
+        allowNull: false
     },
     revenue: {
-        type: DataTypes.INTEGER
+        type: DataTypes.INTEGER,
+        allowNull: false
     },
     budget: {
-        type: DataTypes.INTEGER
-    },
-    votes_average: {
         type: DataTypes.INTEGER,
-        default: 0
+        allowNull: false
     },
-    votes_count: {
+    votesAverage: {
+        type: DataTypes.FLOAT,
+        defaultValue: 0
+    },
+    votesCount: {
         type: DataTypes.INTEGER,
-        default: 0
+        defaultValue: 0
     },
-    imdb_id: {
-        type: DataTypes.STRING
+    imdbId: {
+        type: DataTypes.STRING,
     },
-    original_language: {
-        type: DataTypes.STRING
+    originalLanguage: {
+        type: DataTypes.STRING,
+        allowNull: false
     },
-    spoken_language: {
-        type: DataTypes.STRING
+    spokenLanguage: {
+        type: DataTypes.STRING,
+        allowNull: false
     },
     country: {
-        type: DataTypes.STRING
+        type: DataTypes.STRING,
+        allowNull: false
     }
 })
 

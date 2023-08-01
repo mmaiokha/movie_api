@@ -9,13 +9,13 @@ Movie.belongsToMany(Genre, {as: 'genres', through: 'movie_genres'})
 Genre.belongsToMany(Movie, {as: 'movies', through: 'movie_genres'})
 
 // Movie with product companies
-Movie.belongsToMany(ProductionCompany, {as: 'product_companies', through: 'movie_product_companies'})
+Movie.belongsToMany(ProductionCompany, {as: 'productCompanies', through: 'movie_product_companies'})
 ProductionCompany.belongsToMany(Movie, {as: 'movies', through: 'movie_product_companies'})
 
 // Movie with reviews
-Movie.hasMany(Review, {as: 'reviews'})
+Movie.hasMany(Review, {as: 'reviews', allowNull: false})
 Review.belongsTo(Movie, {as: 'movie'})
 
 // Review with user
 Review.belongsTo(User, {as: 'author'})
-User.hasMany(Review, {as: 'reviews', foreignKey: 'authorId'})
+User.hasMany(Review, {as: 'reviews', foreignKey: 'authorId', allowNull: false})

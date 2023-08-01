@@ -7,16 +7,18 @@ const ProductionCompany = sequelize.define('production_companies', {
         primaryKey: true,
         autoIncrement: true
     },
-    logo_path: {
+    logoPath: {
         type: DataTypes.STRING,
-        default: 'company_default.jpg'
+        defaultValue: 'company_default.jpg'
     },
     name: {
         type: DataTypes.STRING,
-        unique: true
+        unique: true,
+        allowNull: false
     },
-    origin_country: {
-        type: DataTypes.STRING
+    originCountry: {
+        type: DataTypes.STRING,
+        allowNull: false
     }
 })
 

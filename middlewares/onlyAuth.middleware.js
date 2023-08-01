@@ -3,12 +3,6 @@ const User = require('../models/usersModel')
 const jwt = require('jsonwebtoken')
 
 const onlyAuthMiddleware = (type) => async (req, res, next) => {
-    // // require to session auth
-    // if (req.user){
-    //     req.user = req.user.user
-    //     return next()
-    // }
-
     try {
         let token
         if (req.headers.authorization) {
@@ -26,6 +20,9 @@ const onlyAuthMiddleware = (type) => async (req, res, next) => {
         }
 
         req.user = await User.findOne({where: {id: decoded.id}})
+        if (!req.user) {
+            return next(AppError.Unauthorized())
+        }
         next()
     } catch (e) {
         return next(AppError.Unauthorized())

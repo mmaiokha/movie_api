@@ -9,7 +9,9 @@ const Genre = sequelize.define('genres', {
     },
     name: {
         type: DataTypes.STRING,
-        unique: true
+        unique: true,
+        require: true,
+        allowNull: false
     }
 })
 

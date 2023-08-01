@@ -2,6 +2,7 @@ const User = require('../models/usersModel')
 const {Op} = require('sequelize')
 const AppError = require('../exception/AppError')
 const jwt = require('jsonwebtoken')
+const catchAsync = require('../utils/catchAsync')
 
 const generateUserResponseAndRefreshTokens = async (user) => {
     const accessToken = jwt.sign(
@@ -60,7 +61,7 @@ const setAuthCookies = async (res, accessToken, refreshToken) => {
     res.cookie('jwtRefresh', refreshToken, refreshOptions)
 }
 
-const register = async (req, res, next) => {
+const register = catchAsync(async (req, res, next) => {
     const {fullName, email, password, passwordConfirm} = req.body
     if (!email || !password || !passwordConfirm) {
         return next(AppError.BadRequest('Please fill all fields!'))
@@ -84,9 +85,9 @@ const register = async (req, res, next) => {
     const authResponse = await generateUserResponseAndRefreshTokens(user)
     await setAuthCookies(res, authResponse.accessToken, authResponse.refreshToken)
     return res.status(200).json(authResponse)
-}
+})
 
-const login = async (req, res, next) => {
+const login = catchAsync(async (req, res, next) => {
     const {email, password} = req.body
     if (!email || !password) return next(AppError.BadRequest('Please fill all fields!'))
     const candidate = await User.findOne({
@@ -97,19 +98,19 @@ const login = async (req, res, next) => {
     if (!candidate) return next(AppError.BadRequest('User does not exist!'))
     if (!await candidate.comparePassword(password)) return next(AppError.BadRequest('Wrong password!'))
     return res.status(200).json(await generateUserResponseAndRefreshTokens(candidate))
-}
+})
 
-const currentUser = async (req, res, next) => {
+const currentUser = catchAsync(async (req, res, next) => {
     return res.status(200).json(await generateUserResponseAndRefreshTokens(req.user))
-}
+})
 
-const refreshToken = async (req, res, next) => {
+const refreshToken = catchAsync(async (req, res, next) => {
     const user = await User.findOne({where: req.user.id})
     if (!await user.compareTokens(req.headers.authorization.split(' ')[1])) {
         return next(AppError.Unauthorized())
     }
     return res.status(200).json(await generateUserResponseAndRefreshTokens(user))
-}
+})
 
 
 module.exports = {
